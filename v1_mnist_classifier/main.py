@@ -31,9 +31,11 @@ aren't guesses, they're widely-used defaults for MNIST-scale problems).
 """
 
 import os
+import mlflow
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from mlflow.entities import SpanType
 
 from src.dataset import get_dataloaders
 from src.model import MLPClassifier
@@ -75,9 +77,36 @@ DATA_DIR = "./data"
 # you could later reload and reuse this exact trained model without
 # retraining from scratch.
 CHECKPOINT_PATH = "./saved_models/mlp_mnist.pt"
+MLFLOW_TRACKING_URI = "http://127.0.0.1:5001"
+MLFLOW_EXPERIMENT_NAME = "aio-vision-from-scratch"
+
+
+def configure_mlflow():
+    if "MLFLOW_TRACKING_URI" not in os.environ:
+        mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
+    if "MLFLOW_EXPERIMENT_ID" not in os.environ:
+        mlflow.set_experiment(MLFLOW_EXPERIMENT_NAME)
+    mlflow.autolog()
 
 
 def main():
+    configure_mlflow()
+    run_pipeline()
+
+
+@mlflow.trace(name="v1_mlp_mnist_pipeline", span_type=SpanType.CHAIN)
+def run_pipeline():
+    mlflow.log_params(
+        {
+            "version": "v1_mnist_classifier",
+            "model_type": "MLPClassifier",
+            "batch_size": BATCH_SIZE,
+            "hidden_size": HIDDEN_SIZE,
+            "learning_rate": LEARNING_RATE,
+            "epochs": EPOCHS,
+        }
+    )
+
     # ------------------------------------------------------------
     # STEP 0: Choose the compute device (CPU vs GPU)
     # ------------------------------------------------------------
@@ -95,7 +124,15 @@ def main():
     # ------------------------------------------------------------
     # See src/dataset.py for the full explanation of what happens here
     # (downloading MNIST, normalizing pixel values, batching).
-    train_loader, test_loader = get_dataloaders(DATA_DIR, BATCH_SIZE)
+    with mlflow.start_span(name="load_mnist_data", span_type=SpanType.RETRIEVER) as span:
+        span.set_inputs({"data_dir": DATA_DIR, "batch_size": BATCH_SIZE})
+        train_loader, test_loader = get_dataloaders(DATA_DIR, BATCH_SIZE)
+        span.set_outputs(
+            {
+                "train_examples": len(train_loader.dataset),
+                "test_examples": len(test_loader.dataset),
+            }
+        )
 
     # ------------------------------------------------------------
     # STEP 2: Build the model
@@ -104,7 +141,10 @@ def main():
     # (see src/model.py for the architecture details), then moves it onto
     # whichever device we picked in Step 0. Right now, before any
     # training, this model's predictions are essentially random guesses.
-    model = MLPClassifier(hidden_size=HIDDEN_SIZE).to(device)
+    with mlflow.start_span(name="build_mlp_model", span_type=SpanType.TOOL) as span:
+        span.set_inputs({"hidden_size": HIDDEN_SIZE, "device": str(device)})
+        model = MLPClassifier(hidden_size=HIDDEN_SIZE).to(device)
+        span.set_outputs({"parameters": sum(p.numel() for p in model.parameters())})
 
     # ------------------------------------------------------------
     # STEP 3: Define how we measure "wrongness" and how we fix it
@@ -126,7 +166,10 @@ def main():
     # through the training data. Watch the printed train_loss go down and
     # train_acc go up as it progresses. See src/train.py for the full
     # step-by-step explanation of what happens inside each pass.
-    train(model, train_loader, optimizer, criterion, device, EPOCHS)
+    with mlflow.start_span(name="train_mlp_model", span_type=SpanType.CHAIN) as span:
+        span.set_inputs({"epochs": EPOCHS, "learning_rate": LEARNING_RATE})
+        train(model, train_loader, optimizer, criterion, device, EPOCHS)
+        span.set_outputs({"completed_epochs": EPOCHS})
 
     # ------------------------------------------------------------
     # STEP 5: Evaluate on unseen test data
@@ -134,7 +177,15 @@ def main():
     # Now that training is done, check how well the model performs on
     # images it has NEVER seen before — this is the honest measure of
     # how good the model actually is. See src/evaluate.py for details.
-    accuracy, confusion = evaluate(model, test_loader, device)
+    with mlflow.start_span(name="evaluate_mlp_model", span_type=SpanType.CHAIN) as span:
+        accuracy, confusion = evaluate(model, test_loader, device)
+        span.set_outputs(
+            {
+                "accuracy": accuracy,
+                "confusion_matrix": confusion.tolist(),
+            }
+        )
+    mlflow.log_metric("test_accuracy", accuracy)
     print(f"\nTest accuracy: {accuracy:.4f}")
     print_confusion_matrix(confusion)
 
@@ -147,8 +198,11 @@ def main():
     # PyTorch way to persist a trained model — it's small, portable, and
     # future versions of PyTorch can still load it, since it doesn't
     # depend on this exact Python class definition being unchanged.
-    os.makedirs(os.path.dirname(CHECKPOINT_PATH), exist_ok=True)
-    torch.save(model.state_dict(), CHECKPOINT_PATH)
+    with mlflow.start_span(name="save_mlp_checkpoint", span_type=SpanType.TOOL) as span:
+        span.set_inputs({"checkpoint_path": CHECKPOINT_PATH})
+        os.makedirs(os.path.dirname(CHECKPOINT_PATH), exist_ok=True)
+        torch.save(model.state_dict(), CHECKPOINT_PATH)
+        span.set_outputs({"checkpoint_path": CHECKPOINT_PATH})
     print(f"\nModel saved to {CHECKPOINT_PATH}")
 
 
