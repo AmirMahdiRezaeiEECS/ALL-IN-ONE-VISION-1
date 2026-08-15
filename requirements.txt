@@ -1,0 +1,7 @@
+torch==2.13.0
+torchvision==0.28.0
+omegaconf>=2.3
+fvcore>=0.1.5
+mlflow>=3.0
+torchmetrics>=1.0
+pyyaml
