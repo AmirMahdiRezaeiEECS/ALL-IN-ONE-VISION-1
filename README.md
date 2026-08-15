@@ -67,24 +67,46 @@ tests/                   # pytest suite (config/instantiate mechanics, catalog,
                            # meta_arch forward contract, full pipeline smoke test)
 ```
 
+## Setup (uv — recommended)
+
+This project uses [uv](https://docs.astral.sh/uv/) for fast, reproducible environments.
+
+```bash
+# Install uv once: https://docs.astral.sh/uv/getting-started/installation/
+# Then from the project root:
+
+uv sync                  # creates .venv, installs deps + project (editable)
+# or with dev tools (pytest):
+uv sync --group dev
+```
+
+Activate the environment (optional if you use `uv run`):
+
+```bash
+source .venv/bin/activate   # Linux / macOS
+# .venv\Scripts\activate    # Windows
+```
+
 ## Running an experiment
 
 ```bash
-# from the project root, with the anaconda env active
-pip install -r requirements.txt
+# Preferred (no need to activate):
+uv run python tools/train_net.py --config-file configs/MNIST/mlp_baseline.py
+uv run python tools/train_net.py --config-file configs/MNIST/cnn_baseline.py
 
-python tools/train_net.py --config-file configs/MNIST/mlp_baseline.py
-python tools/train_net.py --config-file configs/MNIST/cnn_baseline.py
-
-# override anything from the CLI without editing files:
-python tools/train_net.py --config-file configs/MNIST/mlp_baseline.py \
+# Override anything from the CLI without editing files:
+uv run python tools/train_net.py --config-file configs/MNIST/mlp_baseline.py \
     train.max_epochs=10 optimizer.lr=0.005
+
+# Classic style (after `source .venv/bin/activate`):
+python tools/train_net.py --config-file configs/MNIST/mlp_baseline.py
 ```
 
 MLflow runs are written to the default local tracking store. View them with:
 
 ```bash
-mlflow ui
+uv run mlflow ui
+# or: mlflow ui   (if the env is activated)
 ```
 
 > Note: recent MLflow versions (3.x) put the bare local filesystem store
@@ -96,8 +118,8 @@ mlflow ui
 ## Running tests
 
 ```bash
-pip install pytest
-PYTHONPATH=. pytest tests/ -v
+uv sync --group dev
+uv run pytest tests/ -v
 ```
 
 All 11 tests pass as of this version, including a full
