@@ -1,13 +1,31 @@
 # ALL_IN_ONE_VISION_1
 
 Classification-focused computer vision project, architected to closely
-follow **Detectron2's** structure and philosophy (registries, a
-LazyConfig-style config system, a hook-based engine, a
-DatasetEvaluator interface), adapted for classification.
+follow **Detectron2's** structure and philosophy (a catalog pattern for
+datasets, a LazyConfig-style declarative config system, a hook-based
+training engine, a DatasetEvaluator interface), adapted for
+classification.
 
 **Scope note:** this is explicitly classification-only. Detection/
 segmentation-specific abstractions (boxes, ROI heads, anchors,
 proposal generators, etc.) are intentionally NOT part of this project.
+
+## 📚 Documentation — start here
+
+This README is a quick reference. For a full, guided learning path —
+assuming zero prior knowledge of this project — start at
+**[`docs/00_start_here.md`](docs/00_start_here.md)**:
+
+| Doc | Covers |
+|---|---|
+| [`00_start_here.md`](docs/00_start_here.md) | Orientation; a working example in 2 minutes |
+| [`01_architecture_and_concepts.md`](docs/01_architecture_and_concepts.md) | The big picture: what each package does and *why*; five core concepts explained from scratch |
+| [`02_config_system_deep_dive.md`](docs/02_config_system_deep_dive.md) | Exactly how `LazyCall`/`instantiate`/`LazyConfig` work, with a fully worked trace |
+| [`03_training_workflow_walkthrough.md`](docs/03_training_workflow_walkthrough.md) | A line-by-line trace of `tools/train_net.py` |
+| [`04_extending_the_project.md`](docs/04_extending_the_project.md) | Copy-paste guide: adding a new dataset or model |
+| [`05_mlflow_and_experiment_tracking.md`](docs/05_mlflow_and_experiment_tracking.md) | How MLflow is wired in, and how to extend it |
+| [`06_testing_guide.md`](docs/06_testing_guide.md) | What the test suite proves and how to extend it |
+| [`07_faq_and_design_deviations.md`](docs/07_faq_and_design_deviations.md) | Every deliberate deviation from upstream Detectron2, explained |
 
 ## v1 — status
 
