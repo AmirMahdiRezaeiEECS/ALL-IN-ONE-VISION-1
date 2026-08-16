@@ -57,14 +57,14 @@ whether a change broke something structural, run this test first.
 ## Running the tests
 
 ```bash
-pip install pytest
-PYTHONPATH=. pytest tests/ -v
+uv sync --group dev
+uv run pytest tests/ -v
 ```
 
-(`PYTHONPATH=.` is needed so `all_in_one_vision` and `configs` resolve as
-importable packages when pytest is run from the project root without an
-editable install — the same reason `tools/train_net.py` has its
-`sys.path.insert(...)` line.)
+(`uv sync` installs the project in editable mode, so `all_in_one_vision`
+and `configs` are importable without a manual `PYTHONPATH`. The
+`sys.path.insert(...)` in `tools/train_net.py` remains only as a
+convenience when someone runs that script outside the uv environment.)
 
 ## Adding a test for something you just added
 

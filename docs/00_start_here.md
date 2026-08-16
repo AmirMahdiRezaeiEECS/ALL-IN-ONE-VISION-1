@@ -42,13 +42,13 @@ these docs out of order too if you want to jump straight to one topic.
 
 ## The two-minute example
 
-From the project root, with your environment active:
+From the project root (uv is the only supported setup — see README):
 
 ```bash
-pip install -r requirements.txt
+uv sync
 
 # Train the simplest model (an MLP) on MNIST for a few epochs.
-python tools/train_net.py --config-file configs/MNIST/mlp_baseline.py
+uv run python tools/train_net.py --config-file configs/MNIST/mlp_baseline.py
 ```
 
 That single command:
@@ -65,13 +65,13 @@ To try the CNN instead, **you don't edit any code** — you point at a
 different config:
 
 ```bash
-python tools/train_net.py --config-file configs/MNIST/cnn_baseline.py
+uv run python tools/train_net.py --config-file configs/MNIST/cnn_baseline.py
 ```
 
 And to change a hyperparameter without creating a new file at all:
 
 ```bash
-python tools/train_net.py --config-file configs/MNIST/mlp_baseline.py \
+uv run python tools/train_net.py --config-file configs/MNIST/mlp_baseline.py \
     train.max_epochs=10 optimizer.lr=0.005
 ```
 

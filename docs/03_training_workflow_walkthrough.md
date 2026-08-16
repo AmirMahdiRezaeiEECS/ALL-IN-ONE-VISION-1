@@ -32,9 +32,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 ```
 This just makes sure the project root is importable as `all_in_one_vision`
 and `configs`, whether you run the script as `python tools/train_net.py`
-from the project root or from somewhere else. If you install the project
-properly (`pip install -e .`) later, this line becomes unnecessary — it's
-a convenience for running straight from a git checkout.
+from the project root or from somewhere else. With the recommended
+setup (`uv sync`), the project is already installed editable, so this
+line is only a convenience for running straight from a git checkout
+without activating the environment.
 
 ---
 
