@@ -21,3 +21,8 @@ def test_build_loader_with_fake_dataset():
     images, labels = next(iter(loader))
     assert images.shape == (8, 1, 28, 28)
     assert labels.shape == (8,)
+
+def test_cifar10_is_registered_on_import():
+    names = DatasetCatalog.list()
+    assert "cifar10_train" in names
+    assert "cifar10_test" in names

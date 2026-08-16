@@ -25,3 +25,17 @@ def test_mlp_contract():
 
 def test_cnn_contract():
     _check_train_eval_contract(SimpleCNNClassifier(in_channels=1, num_classes=10))
+
+def test_cnn_contract_cifar10_shape():
+    images = torch.rand(4, 3, 32, 32)
+    targets = torch.randint(0, 10, (4,))
+    model = SimpleCNNClassifier(in_channels=3, num_classes=10, image_size=32)
+
+    model.train()
+    out = model(images, targets)
+    assert out["loss_cls"].dim() == 0
+
+    model.eval()
+    with torch.no_grad():
+        logits = model(images)
+    assert logits.shape == (4, 10)
