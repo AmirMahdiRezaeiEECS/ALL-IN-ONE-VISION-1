@@ -14,10 +14,11 @@ dependencies = [
     "pyyaml",
 ]
 
+[project.optional-dependencies]
+export = ["onnx>=1.15", "onnxruntime>=1.17", "onnxscript>=0.1"]
+
 [dependency-groups]
-dev = [
-    "pytest>=8.0",
-]
+dev = ["pytest>=8.0", "all-in-one-vision[export]"]
 
 [build-system]
 requires = ["hatchling"]
