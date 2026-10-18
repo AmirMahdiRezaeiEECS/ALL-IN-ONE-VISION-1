@@ -4,8 +4,6 @@
 
 A modular, configuration-driven computer vision framework built with PyTorch and Torchvision. Designed as a reusable foundation for future ML projects, it provides configurable workflows for dataset preparation, model training, evaluation, and deployment preparation, reducing repetitive development while supporting different vision tasks and model architectures.
 
-Current focus: Image classification, with MNIST as the initial dataset and support for both MLP and CNN architectures.
-
 ## 📚 Documentation — start here
 
 This README is a quick reference. For a full, guided learning path —
